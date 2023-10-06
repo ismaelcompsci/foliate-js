@@ -1,3 +1,15 @@
+const debugMessage = (m) => {
+    if (typeof window.ReactNativeWebView != 'undefined') {
+        window.ReactNativeWebView.postMessage(
+            JSON.stringify({
+                type: 'epubjs',
+                message: m,
+            }),
+        )
+    } else {
+        console.log(m)
+    }
+}
 const wait = ms => new Promise(resolve => setTimeout(resolve, ms))
 
 const debounce = (f, wait, immediate) => {
@@ -386,6 +398,10 @@ export class Paginator extends HTMLElement {
     #touchState
     #touchScrolled
     pageAnimation = true
+    #canGoToNextSection = false
+    #canGoToPrevSection = false
+    #goingNext = false
+    #goingPrev = false
     constructor() {
         super()
         this.#root.innerHTML = `<style>
@@ -669,9 +685,24 @@ export class Paginator extends HTMLElement {
         const page = Math.floor(
             Math.max(min, Math.min(max, (start + end) / 2
                 + (isNaN(d) ? 0 : d))) / size)
+        const dir = page <= 0 ? -1 : page >= pages - 1 ? 1 : null
+
+        if (dir) {
+            if (this.lastCalled) {
+                this.now = Date.now()
+
+                const elapsed = this.now - this.lastCalled
+                this.lastCalled = null
+
+                if (elapsed < 350) {
+                    return
+                }
+            }
+
+            this.lastCalled = Date.now()
+        }
 
         this.#scrollToPage(page, 'snap').then(() => {
-            const dir = page <= 0 ? -1 : page >= pages - 1 ? 1 : null
             if (dir) return this.#goTo({
                 index: this.#adjacentIndex(dir),
                 anchor: dir < 0 ? () => 1 : () => 0,
@@ -690,7 +721,10 @@ export class Paginator extends HTMLElement {
         const state = this.#touchState
         if (state.pinched) return
         state.pinched = globalThis.visualViewport.scale > 1
-        if (this.scrolled || state.pinched) return
+        if (this.scrolled || state.pinched) {
+            this.#check()
+            return
+        }
         if (e.touches.length > 1) {
             if (this.#touchScrolled) e.preventDefault()
             return
@@ -710,7 +744,31 @@ export class Paginator extends HTMLElement {
     }
     #onTouchEnd() {
         this.#touchScrolled = false
-        if (this.scrolled) return
+        if (this.scrolled) {
+            // const scrollTop = this.#container.scrollTop
+            // const scrollheight = this.#container.scrollHeight
+            // const s = this.#isScrollable();
+
+            // reactMessage(
+            //   `[#CHECK] isScrollable ${s} sT ${scrollTop} sH ${scrollheight}`
+            // );
+
+            if (this.#canGoToNextSection) {
+                this.nextSection().then(() => {
+                    this.#goingNext = true
+                })
+            }
+
+            if (this.#canGoToPrevSection) {
+                this.prevSection().then(() => {
+                    this.#goingPrev = true
+                })
+            }
+
+            this.#canGoToPrevSection = false
+            this.#canGoToNextSection = false
+            return
+        }
 
         // XXX: Firefox seems to report scale as 1... sometimes...?
         // at this point I'm basically throwing `requestAnimationFrame` at
@@ -719,6 +777,32 @@ export class Paginator extends HTMLElement {
             if (globalThis.visualViewport.scale === 1)
                 this.snap(this.#touchState.vx, this.#touchState.vy)
         })
+    }
+    #check() {
+        /**
+         * TODO if item is not scrollable
+         * the scrolled flow gets stuck
+         * so make a swipe to go next when user swipes
+         * ?
+         */
+        if (this.scrolled) {
+            const scrollTop = this.#container.scrollTop
+            const scrollheight = this.#container.scrollHeight
+
+            const start = scrollTop
+            const end = this.end - scrollheight
+
+            if (end > 80) {
+                this.#canGoToNextSection = true
+                return
+            }
+            if (start < -80) {
+                this.#canGoToPrevSection = true
+                return
+            }
+            this.#canGoToPrevSection = false
+            this.#canGoToNextSection = false
+        }
     }
     // allows one to process rects as if they were LTR and horizontal
     #getRectMapper() {
@@ -790,7 +874,25 @@ export class Paginator extends HTMLElement {
         }
         // if anchor is a fraction
         if (this.scrolled) {
-            await this.#scrollTo(anchor * this.viewSize, 'anchor')
+            if (this.#goingPrev || this.#goingNext) {
+                if (this.#goingPrev) {
+                    await this.#scrollTo(this.viewSize, 'anchor')
+                    this.#goingPrev = false
+                    return
+                } else {
+                    await this.#scrollTo(0, 'anchor')
+                    this.#goingNext = false
+                    return
+                }
+            }
+            // idk what this.#anchor is ????
+            this.#anchor &&
+              debugMessage(
+                  `[SCROLLTOANCHOR] anchor ${JSON.stringify(this.#anchor)} ${
+                      this.#anchor
+                  }`,
+              )
+            // await this.#scrollTo(this.#anchor * this.viewSize, "anchor");
             return
         }
         const { pages } = this
