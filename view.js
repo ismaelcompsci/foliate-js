@@ -2,6 +2,11 @@ import * as CFI from './epubcfi.js'
 import { TOCProgress, SectionProgress } from './progress.js'
 import { Overlayer } from './overlayer.js'
 import { textWalker } from './text-walker.js'
+import { FixedLayout }from './fixed-layout.js'
+import { Paginator } from './paginator.js'
+import { searchMatcher } from './search.js'
+import { TTS } from './tts.js'
+
 
 const SEARCH_PREFIX = 'foliate-search:'
 
@@ -101,10 +106,8 @@ export class View extends HTMLElement {
 
         this.isFixedLayout = this.book.rendition?.layout === 'pre-paginated'
         if (this.isFixedLayout) {
-            await import('./fixed-layout.js')
             this.renderer = document.createElement('foliate-fxl')
         } else {
-            await import('./paginator.js')
             this.renderer = document.createElement('foliate-paginator')
         }
         this.renderer.setAttribute('exportparts', 'head,foot,filter')
@@ -377,7 +380,6 @@ export class View extends HTMLElement {
     }
     async * search(opts) {
         this.clearSearch()
-        const { searchMatcher } = await import('./search.js')
         const { query, index } = opts
         const matcher = searchMatcher(textWalker,
             { defaultLocale: this.language, ...opts })
@@ -418,7 +420,6 @@ export class View extends HTMLElement {
     async initTTS() {
         const doc = this.renderer.getContents()[0].doc
         if (this.tts && this.tts.doc === doc) return
-        const { TTS } = await import('./tts.js')
         this.tts = new TTS(doc, textWalker, range =>
             this.renderer.scrollToAnchor(range, true))
     }
