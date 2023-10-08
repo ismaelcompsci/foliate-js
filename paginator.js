@@ -376,7 +376,7 @@ export class Paginator extends HTMLElement {
         'flow', 'gap', 'margin',
         'max-inline-size', 'max-block-size', 'max-column-count',
     ]
-    #root = this.attachShadow({ mode: 'closed' })
+    #root = this.attachShadow({ mode: 'open' })
     #observer = new ResizeObserver(() => this.render())
     #background
     #container
@@ -533,6 +533,7 @@ export class Paginator extends HTMLElement {
     }
     #createView() {
         if (this.#view) this.#container.removeChild(this.#view.element)
+        // debugMessage(`[CREATEVIEW] anchor ${this.#anchor} ${JSON.stringify(this.#anchor)}`)
         this.#view = new View({
             container: this,
             onExpand: () => this.scrollToAnchor(this.#anchor),
@@ -749,16 +750,21 @@ export class Paginator extends HTMLElement {
                 this.nextSection().then(() => {
                     this.#goingNext = true
                 })
+                this.dispatchEvent(new CustomEvent('next', {detail: {show: false}}))
             }
 
             if (this.#canGoToPrevSection) {
                 this.prevSection().then(() => {
                     this.#goingPrev = true
                 })
+                this.dispatchEvent(new CustomEvent('previous', {detail: {show: false}}))
+
             }
 
             this.#canGoToPrevSection = false
             this.#canGoToNextSection = false
+
+
             return
         }
 
@@ -786,14 +792,25 @@ export class Paginator extends HTMLElement {
 
             if (end > 80) {
                 this.#canGoToNextSection = true
+                this.dispatchEvent(new CustomEvent('next', {detail: {show: true}}))
                 return
             }
             if (start < -80) {
                 this.#canGoToPrevSection = true
+                this.dispatchEvent(new CustomEvent('previous', {detail: {show: true}}))
                 return
             }
             this.#canGoToPrevSection = false
             this.#canGoToNextSection = false
+
+
+            if (this.sentEvent) {
+                this.sentEvent = false
+                this.dispatchEvent(new CustomEvent('next', { detail: { show: false } }))
+                this.dispatchEvent(new CustomEvent('previous', { detail: { show: false } }))
+            } else {
+                this.sentEvent = true
+            }
         }
     }
     // allows one to process rects as if they were LTR and horizontal
@@ -884,7 +901,7 @@ export class Paginator extends HTMLElement {
                       this.#anchor
                   }`,
               )
-            // await this.#scrollTo(this.#anchor * this.viewSize, "anchor");
+            // await this.#scrollTo(this.#anchor * this.viewSize, 'anchor')
             return
         }
         const { pages } = this
