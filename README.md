@@ -3,7 +3,7 @@
 Library for rendering e-books in the browser.
 
 Features:
-- Supports EPUB, MOBI, KF8, FB2, CBZ
+- Supports EPUB, MOBI, KF8 (AZW3), FB2, CBZ, PDF (experimental; requires PDF.js), or add support for other formats yourself by implementing the book interface
 - Pure JavaScript
 - Small and modular
 - No dependencies
@@ -104,7 +104,7 @@ Processors for each book format return an object that implements the following i
 - `.isExternal(href)`: returns a boolean. If `true`, the link should be opened externally.
 
 The following methods are consumed by `progress.js`, for getting the correct TOC and page list item when navigating:
-- `.splitTOCHref(href)`: given an href string (from the TOC), returns an array, the first element of which is the `id` of the section (see above), and the second element is the fragment identifier (can be any type; see below)
+- `.splitTOCHref(href)`: given an href string (from the TOC), returns an array, the first element of which is the `id` of the section (see above), and the second element is the fragment identifier (can be any type; see below). May be async.
 - `.getTOCFragment(doc, id)`: given a `Document` object and a fragment identifier (the one provided by `.splitTOCHref()`; see above), returns a `Node` representing the target linked by the TOC item
 
 Almost all of the properties and methods are optional. At minimum it needs `.sections` and the `.load()` method for the sections, as otherwise there won't be anything to render.
@@ -127,6 +127,12 @@ One advantage of having such an interface is that one can easily use it for read
 It can read both MOBI and KF8 (.azw3, and combo .mobi files) from a `File` (or `Blob`) object. For MOBI files, it decompresses all text at once and splits the raw markup into sections at every `<mbp:pagebreak>`, instead of outputing one long page for the whole book, which drastically improves rendering performance. For KF8 files, it tries to decompress as little text as possible when loading a section, but it can still be quite slow due to the slowness of the current HUFF/CDIC decompressor implementation. In all cases, images and other resources are not loaded until they are needed.
 
 Note that KF8 files can contain fonts that are zlib-compressed. They need to be decompressed with an external library. The demo uses [fflate](https://github.com/101arrowz/fflate) to decompress them.
+
+### PDF and Other Fixed-Layout Formats
+
+There is a proof-of-concept, highly experimental adapter for [PDF.js](https://mozilla.github.io/pdf.js/), with which you can show PDFs using the same fixed-layout renderer for EPUBs.
+
+CBZs are similarly handled like fixed-layout EPUBs.
 
 ### The Renderers
 
@@ -292,3 +298,4 @@ MIT.
 Vendored libraries for the demo:
 - [zip.js](https://github.com/gildas-lormeau/zip.js) is licensed under the BSD-3-Clause license.
 - [fflate](https://github.com/101arrowz/fflate) is MIT licensed.
+- [PDF.js](https://mozilla.github.io/pdf.js/) is licensed under Apache.
