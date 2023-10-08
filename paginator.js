@@ -245,6 +245,7 @@ class View {
         else this.scrolled(layout)
     }
     scrolled({ gap, columnWidth }) {
+        debugMessage('[SCROLLED] SCROLLED...')
         const vertical = this.#vertical
         const doc = this.document
         Object.assign(doc.documentElement.style, {
@@ -262,6 +263,7 @@ class View {
         this.expand()
     }
     columnize({ width, height, gap, columnWidth }) {
+        debugMessage('[COLUMNIZE] COLUMNIZING...')
         const vertical = this.#vertical
         this.#size = vertical ? height : width
 
@@ -315,6 +317,7 @@ class View {
         }
     }
     expand() {
+        debugMessage('[EXPAND] EXPANDING...')
         if (this.#column) {
             const side = this.#vertical ? 'height' : 'width'
             const otherSide = this.#vertical ? 'width' : 'height'
@@ -628,6 +631,7 @@ export class Paginator extends HTMLElement {
     }
     render() {
         if (!this.#view) return
+        debugMessage('[RENDER]')
         this.#view.render(this.#beforeRender({
             vertical: this.#vertical,
             rtl: this.#rtl,
@@ -723,7 +727,12 @@ export class Paginator extends HTMLElement {
         if (state.pinched) return
         state.pinched = globalThis.visualViewport.scale > 1
         if (this.scrolled || state.pinched) {
-            this.#check()
+            if (this.hasChecked) {
+                this.hasChecked = false
+                this.#check()
+            } else {
+                this.hasChecked = true
+            }
             return
         }
         if (e.touches.length > 1) {
@@ -798,12 +807,12 @@ export class Paginator extends HTMLElement {
             const start = scrollTop
             const end = this.end - scrollheight
 
-            if (end > 80) {
+            if (end > 50) {
                 this.#canGoToNextSection = true
                 this.dispatchEvent(new CustomEvent('next', {detail: {show: true}}))
                 return
             }
-            if (start < -80) {
+            if (start < -50) {
                 this.#canGoToPrevSection = true
                 this.dispatchEvent(new CustomEvent('previous', {detail: {show: true}}))
                 return
@@ -1079,6 +1088,7 @@ export class Paginator extends HTMLElement {
     }
     setStyles(styles) {
         this.#styles = styles
+        debugMessage('[SETSTYLES] SETTING STYLES')
         const $$styles = this.#styleMap.get(this.#view?.document)
         if (!$$styles) return
         const [$beforeStyle, $style] = $$styles
