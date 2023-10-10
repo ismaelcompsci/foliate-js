@@ -6,6 +6,7 @@ import { FixedLayout }from './fixed-layout.js'
 import { Paginator } from './paginator.js'
 import { searchMatcher } from './search.js'
 import { TTS } from './tts.js'
+import debugMessage from './debug.js'
 
 
 const SEARCH_PREFIX = 'foliate-search:'
@@ -107,6 +108,7 @@ export class View extends HTMLElement {
         this.isFixedLayout = this.book.rendition?.layout === 'pre-paginated'
         if (this.isFixedLayout) {
             this.renderer = document.createElement('foliate-fxl')
+            debugMessage('[VIEW_OPEN] fixed layout element')
         } else {
             this.renderer = document.createElement('foliate-paginator')
         }
@@ -138,6 +140,8 @@ export class View extends HTMLElement {
                 lastActive?.deref()?.classList?.remove(activeClass)
             })
         }
+
+        debugMessage('[VIEW_OPEN] DONE OPENING BOOK...')
     }
     close() {
         this.renderer?.destroy()

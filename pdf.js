@@ -1,4 +1,5 @@
 /* global pdfjsLib */
+import debugMessage from './debug.js'
 
 // https://github.com/mozilla/pdf.js/blob/f04967017f22e46d70d11468dd928b4cdc2f6ea1/web/text_layer_builder.css
 const textLayerBuilderCSS = `
@@ -494,6 +495,7 @@ const annotationLayerBuilderCSS = `
 `
 
 const renderPage = async (page, getImageBlob) => {
+    // debugMessage('[RENDERPAGE]')
     const scale = devicePixelRatio
     const viewport = page.getViewport({ scale })
 
@@ -503,7 +505,10 @@ const renderPage = async (page, getImageBlob) => {
     const canvasContext = canvas.getContext('2d')
     await page.render({ canvasContext, viewport }).promise
     const blob = await new Promise(resolve => canvas.toBlob(resolve))
+    // debugMessage('[RENDERPAGE] GETTING BLOB...')
     if (getImageBlob) return blob
+    // debugMessage('[RENDERPAGE] DONE GETTINGBLOB')
+
 
     /*
     // with the SVG backend
@@ -550,6 +555,7 @@ const renderPage = async (page, getImageBlob) => {
         ${container.outerHTML}
         ${div.outerHTML}
     `], { type: 'text/html' }))
+    // debugMessage(`[RENDERPAGE] done getting url ${url}`)
     return url
 }
 

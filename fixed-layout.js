@@ -93,7 +93,9 @@ export class FixedLayout extends HTMLElement {
         const left = this.#left ?? {}
         const right = this.#center ?? this.#right
         const target = side === 'left' ? left : right
-        const { width, height } = this.getBoundingClientRect()
+        let { width, height } = this.getBoundingClientRect()
+        var _width = (window.innerWidth > 0) ? window.innerWidth : screen.width
+        width = width === 0 ? _width : width
         const portrait = this.spread !== 'both' && this.spread !== 'portrait'
             && height > width
         this.#portrait = portrait
