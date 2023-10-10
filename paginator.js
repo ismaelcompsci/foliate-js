@@ -245,7 +245,7 @@ class View {
         else this.scrolled(layout)
     }
     scrolled({ gap, columnWidth }) {
-        debugMessage('[SCROLLED] SCROLLED...')
+        // debugMessage('[SCROLLED] SCROLLED...')
         const vertical = this.#vertical
         const doc = this.document
         Object.assign(doc.documentElement.style, {
@@ -263,7 +263,7 @@ class View {
         this.expand()
     }
     columnize({ width, height, gap, columnWidth }) {
-        debugMessage('[COLUMNIZE] COLUMNIZING...')
+        // debugMessage('[COLUMNIZE] COLUMNIZING...')
         const vertical = this.#vertical
         this.#size = vertical ? height : width
 
@@ -317,8 +317,9 @@ class View {
         }
     }
     expand() {
-        debugMessage('[EXPAND] EXPANDING...')
+        // debugMessage('[EXPAND] EXPANDING...')
         if (this.#column) {
+            // debugMessage('[EXPAND] COLUMN')
             const side = this.#vertical ? 'height' : 'width'
             const otherSide = this.#vertical ? 'width' : 'height'
             const contentSize = this.#contentRange.getBoundingClientRect()[side]
@@ -339,6 +340,7 @@ class View {
                 this.#overlayer.redraw()
             }
         } else {
+            // debugMessage('[EXPAND] ELSE')
             const side = this.#vertical ? 'width' : 'height'
             const otherSide = this.#vertical ? 'height' : 'width'
             const doc = this.document
@@ -511,6 +513,8 @@ export class Paginator extends HTMLElement {
             doc.addEventListener('touchmove', this.#onTouchMove.bind(this), opts)
             doc.addEventListener('touchend', this.#onTouchEnd.bind(this))
         })
+
+        debugMessage('[PAGINATOR] INITED')
     }
     attributeChangedCallback(name, _, value) {
         switch (name) {
@@ -623,7 +627,7 @@ export class Paginator extends HTMLElement {
     }
     render() {
         if (!this.#view) return
-        debugMessage('[RENDER]')
+        // debugMessage('[RENDER]')
         this.#view.render(this.#beforeRender({
             vertical: this.#vertical,
             rtl: this.#rtl,
@@ -1080,7 +1084,6 @@ export class Paginator extends HTMLElement {
     }
     setStyles(styles) {
         this.#styles = styles
-        debugMessage('[SETSTYLES] SETTING STYLES')
         const $$styles = this.#styleMap.get(this.#view?.document)
         if (!$$styles) return
         const [$beforeStyle, $style] = $$styles
