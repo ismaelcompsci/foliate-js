@@ -183,7 +183,8 @@ class View {
             position: 'relative',
             overflow: 'hidden',
             flex: '0 0 auto',
-            width: '100%', height: '100%',
+            width: '100%',
+            height: '100%',
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
@@ -192,7 +193,8 @@ class View {
             overflow: 'hidden',
             border: '0',
             display: 'none',
-            width: '100%', height: '100%',
+            width: '100%',
+            height: '100%',
         })
         // `allow-scripts` is needed for events because of WebKit bug
         // https://bugs.webkit.org/show_bug.cgi?id=218086
@@ -345,7 +347,7 @@ class View {
             const otherSide = this.#vertical ? 'height' : 'width'
             const doc = this.document
             const contentSize = doc?.documentElement?.getBoundingClientRect()?.[side]
-            const expandedSize = contentSize
+            const expandedSize = contentSize < this.container.clientHeight ? this.container.clientHeight : contentSize
             const { margin } = this.#layout
             const padding = this.#vertical ? `0 ${margin}px` : `${margin}px 0`
             this.#element.style.padding = padding
@@ -695,7 +697,7 @@ export class Paginator extends HTMLElement {
                 const elapsed = this.now - this.lastCalled
                 this.lastCalled = null
 
-                if (elapsed < 350) {
+                if (elapsed < 325) {
                     return
                 }
             }
@@ -723,7 +725,7 @@ export class Paginator extends HTMLElement {
         if (state.pinched) return
         state.pinched = globalThis.visualViewport.scale > 1
         if (this.scrolled || state.pinched) {
-            if (this.hasChecked) {
+            if (this.hasChecked && this.scrolled) {
                 this.hasChecked = false
                 this.#check()
             } else {
@@ -751,13 +753,6 @@ export class Paginator extends HTMLElement {
     #onTouchEnd() {
         this.#touchScrolled = false
         if (this.scrolled) {
-            // const scrollTop = this.#container.scrollTop
-            // const scrollheight = this.#container.scrollHeight
-            // const s = this.#isScrollable();
-
-            // reactMessage(
-            //   `[#CHECK] isScrollable ${s} sT ${scrollTop} sH ${scrollheight}`
-            // );
 
             if (this.#canGoToNextSection) {
                 this.nextSection().then(() => {
@@ -790,32 +785,29 @@ export class Paginator extends HTMLElement {
         })
     }
     #check() {
-        /**
-         * TODO if item is not scrollable
-         * the scrolled flow gets stuck
-         * so make a swipe to go next when user swipes
-         * ?
-         */
         if (this.scrolled) {
             const scrollTop = this.#container.scrollTop
             const scrollheight = this.#container.scrollHeight
 
             const start = scrollTop
             const end = this.end - scrollheight
+            debugMessage({start, end})
 
             if (end > 50) {
+                if (this.atEnd || this.#canGoToPrevSection) return
                 this.#canGoToNextSection = true
                 this.dispatchEvent(new CustomEvent('next', {detail: {show: true}}))
                 return
             }
             if (start < -50) {
+                if (this.atStart || this.#canGoToNextSection) return
                 this.#canGoToPrevSection = true
                 this.dispatchEvent(new CustomEvent('previous', {detail: {show: true}}))
                 return
             }
-            this.#canGoToPrevSection = false
-            this.#canGoToNextSection = false
 
+            // this.#canGoToPrevSection = false
+            // this.#canGoToNextSection = false
 
             if (this.sentEvent) {
                 this.sentEvent = false
