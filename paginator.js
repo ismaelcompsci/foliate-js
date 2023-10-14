@@ -799,7 +799,6 @@ export class Paginator extends HTMLElement {
 
             const start = scrollTop
             const end = this.end - scrollheight
-            debugMessage({start, end})
 
             if (end > 50) {
                 if (this.atEnd || this.#canGoToPrevSection) return
