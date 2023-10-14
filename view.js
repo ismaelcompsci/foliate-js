@@ -117,7 +117,12 @@ export class View extends HTMLElement {
         this.renderer.addEventListener('relocate', e => this.#onRelocate(e.detail))
         this.renderer.addEventListener('create-overlayer', e =>
             e.detail.attach(this.#createOverlayer(e.detail)))
-        this.renderer.open(book)
+        try{
+            this.renderer.open(book)
+        } catch (err) {
+            debugMessage('[VIEW_OPEN] ' + err)
+            return
+        }
         this.#root.append(this.renderer)
 
         if (book.sections.some(section => section.mediaOverlay)) {
