@@ -736,7 +736,11 @@ class Loader {
         const h = window?.innerHeight ?? 600
         return replacedImports
             // unprefix as most of the props are (only) supported unprefixed
-            .replace(/(?<=[{\s;])-epub-/gi, '')
+            // .replace(/(?<=[{\s;])-epub-/gi, '') // Errors on ios // chatgpt: JavaScript regular expressions allow you to use named capture groups,
+            // but you're using an older syntax that is not supported in JavaScript.
+            // This is likely causing the error.
+            // not sure if its correct but it works now :/
+            .replace(/([;\s])-epub-/gi, '$1') // chatgpt replacement
             // replace vw and vh as they cause problems with layout
             .replace(/(\d*\.?\d+)vw/gi, (_, d) => parseFloat(d) * w / 100 + 'px')
             .replace(/(\d*\.?\d+)vh/gi, (_, d) => parseFloat(d) * h / 100 + 'px')
