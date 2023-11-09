@@ -108,7 +108,6 @@ export class View extends HTMLElement {
         this.isFixedLayout = this.book.rendition?.layout === 'pre-paginated'
         if (this.isFixedLayout) {
             this.renderer = document.createElement('foliate-fxl')
-            debugMessage('[VIEW_OPEN] fixed layout element ' + this.renderer)
         } else {
             this.renderer = document.createElement('foliate-paginator')
         }
@@ -117,7 +116,7 @@ export class View extends HTMLElement {
         this.renderer.addEventListener('relocate', e => this.#onRelocate(e.detail))
         this.renderer.addEventListener('create-overlayer', e =>
             e.detail.attach(this.#createOverlayer(e.detail)))
-        try{
+        try {
             this.renderer.open(book)
         } catch (err) {
             debugMessage('[VIEW_OPEN] ' + err)
@@ -146,7 +145,6 @@ export class View extends HTMLElement {
             })
         }
 
-        debugMessage('[VIEW_OPEN] DONE OPENING BOOK...')
     }
     close() {
         this.renderer?.destroy()
