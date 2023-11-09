@@ -1083,6 +1083,7 @@ export class Paginator extends HTMLElement {
     }
     setStyles(styles) {
         this.#styles = styles
+        debugMessage('[SETSTYLES] SETTING STYLES')
         const $$styles = this.#styleMap.get(this.#view?.document)
         if (!$$styles) return
         const [$beforeStyle, $style] = $$styles
