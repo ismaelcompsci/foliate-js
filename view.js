@@ -108,6 +108,7 @@ export class View extends HTMLElement {
         this.isFixedLayout = this.book.rendition?.layout === 'pre-paginated'
         if (this.isFixedLayout) {
             this.renderer = document.createElement('foliate-fxl')
+            debugMessage('[VIEW_OPEN] fixed layout element')
         } else {
             this.renderer = document.createElement('foliate-paginator')
         }
