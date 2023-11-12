@@ -409,6 +409,7 @@ export class Paginator extends HTMLElement {
     #canGoToPrevSection = false
     #goingNext = false
     #goingPrev = false
+    pause = false
     constructor() {
         super()
         this.#root.innerHTML = `<style>
@@ -729,6 +730,7 @@ export class Paginator extends HTMLElement {
         }
     }
     #onTouchMove(e) {
+        if (this.pause) return
         const state = this.#touchState
         if (state.pinched) return
         state.pinched = globalThis.visualViewport.scale > 1
