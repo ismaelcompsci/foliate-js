@@ -524,7 +524,6 @@ export class Paginator extends HTMLElement {
             doc.addEventListener('touchend', this.#onTouchEnd.bind(this))
         })
 
-        debugMessage('[PAGINATOR] INITED')
 
         this.#mediaQueryListener = () => {
             if (!this.#view) return
@@ -556,7 +555,6 @@ export class Paginator extends HTMLElement {
     }
     #createView() {
         if (this.#view) this.#container.removeChild(this.#view.element)
-        // debugMessage(`[CREATEVIEW] anchor ${this.#anchor} ${JSON.stringify(this.#anchor)}`)
         this.#view = new View({
             container: this,
             onExpand: () => this.scrollToAnchor(this.#anchor),
@@ -808,22 +806,22 @@ export class Paginator extends HTMLElement {
             const end = this.end - scrollheight
 
             if (end > 50) {
-                if (this.atEnd || this.#canGoToPrevSection) return
+                if (this.atEnd || this.#canGoToPrevSection || this.#canGoToNextSection) return
                 this.#canGoToNextSection = true
                 this.dispatchEvent(new CustomEvent('next', {detail: {show: true}}))
                 return
             }
             if (start < -50) {
-                if (this.atStart || this.#canGoToNextSection) return
+                if (this.atStart || this.#canGoToNextSection || this.#canGoToPrevSection) return
                 this.#canGoToPrevSection = true
                 this.dispatchEvent(new CustomEvent('previous', {detail: {show: true}}))
                 return
             }
 
-            // this.#canGoToPrevSection = false
-            // this.#canGoToNextSection = false
+            this.#canGoToPrevSection = false
+            this.#canGoToNextSection = false
 
-            if (this.sentEvent) {
+            if (this.sentEvent && (this.#canGoToPrevSection || this.#canGoToPrevSection)) {
                 this.sentEvent = false
                 this.dispatchEvent(new CustomEvent('next', { detail: { show: false } }))
                 this.dispatchEvent(new CustomEvent('previous', { detail: { show: false } }))
