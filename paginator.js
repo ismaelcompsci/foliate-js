@@ -766,7 +766,6 @@ export class Paginator extends HTMLElement {
     #onTouchEnd() {
         this.#touchScrolled = false
         if (this.scrolled) {
-
             if (this.#canGoToNextSection) {
                 this.nextSection().then(() => {
                     this.#goingNext = true
