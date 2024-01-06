@@ -410,10 +410,10 @@ export class Paginator extends HTMLElement {
     #touchState
     #touchScrolled
     pageAnimation = true
-    #canGoToNextSection = false
-    #canGoToPrevSection = false
-    #goingNext = false
-    #goingPrev = false
+    // #canGoToNextSection = false
+    // #canGoToPrevSection = false
+    // #goingNext = false
+    // #goingPrev = false
     pause = false
     constructor() {
         super()
@@ -737,15 +737,15 @@ export class Paginator extends HTMLElement {
         const state = this.#touchState
         if (state.pinched) return
         state.pinched = globalThis.visualViewport.scale > 1
-        if (this.scrolled || state.pinched) {
-            if (this.hasChecked && this.scrolled) {
-                this.hasChecked = false
-                this.#check()
-            } else {
-                this.hasChecked = true
-            }
-            return
-        }
+        // if (this.scrolled || state.pinched) {
+        //     if (this.hasChecked && this.scrolled) {
+        //         this.hasChecked = false
+        //         this.#check()
+        //     } else {
+        //         this.hasChecked = true
+        //     }
+        //     return
+        // }
         if (e.touches.length > 1) {
             if (this.#touchScrolled) e.preventDefault()
             return
@@ -766,23 +766,23 @@ export class Paginator extends HTMLElement {
     #onTouchEnd() {
         this.#touchScrolled = false
         if (this.scrolled) {
-            if (this.#canGoToNextSection) {
-                this.nextSection().then(() => {
-                    this.#goingNext = true
-                })
-                this.dispatchEvent(new CustomEvent('next', {detail: {show: false}}))
-            }
+            // if (this.#canGoToNextSection) {
+            //     this.nextSection().then(() => {
+            //         this.#goingNext = true
+            //     })
+            //     this.dispatchEvent(new CustomEvent('next', {detail: {show: false}}))
+            // }
 
-            if (this.#canGoToPrevSection) {
-                this.prevSection().then(() => {
-                    this.#goingPrev = true
-                })
-                this.dispatchEvent(new CustomEvent('previous', {detail: {show: false}}))
+            // if (this.#canGoToPrevSection) {
+            //     this.prevSection().then(() => {
+            //         this.#goingPrev = true
+            //     })
+            //     this.dispatchEvent(new CustomEvent('previous', {detail: {show: false}}))
 
-            }
+            // }
 
-            this.#canGoToPrevSection = false
-            this.#canGoToNextSection = false
+            // this.#canGoToPrevSection = false
+            // this.#canGoToNextSection = false
 
 
             return
@@ -796,39 +796,39 @@ export class Paginator extends HTMLElement {
                 this.snap(this.#touchState.vx, this.#touchState.vy)
         })
     }
-    #check() {
-        if (this.scrolled) {
-            const scrollTop = this.#container.scrollTop
-            const scrollheight = this.#container.scrollHeight
+    // #check() {
+    //     if (this.scrolled) {
+    //         const scrollTop = this.#container.scrollTop
+    //         const scrollheight = this.#container.scrollHeight
 
-            const start = scrollTop
-            const end = this.end - scrollheight
+    //         const start = scrollTop
+    //         const end = this.end - scrollheight
 
-            if (end > 50) {
-                if (this.atEnd || this.#canGoToPrevSection || this.#canGoToNextSection) return
-                this.#canGoToNextSection = true
-                this.dispatchEvent(new CustomEvent('next', {detail: {show: true}}))
-                return
-            }
-            if (start < -50) {
-                if (this.atStart || this.#canGoToNextSection || this.#canGoToPrevSection) return
-                this.#canGoToPrevSection = true
-                this.dispatchEvent(new CustomEvent('previous', {detail: {show: true}}))
-                return
-            }
+    //         if (end > 50) {
+    //             if (this.atEnd || this.#canGoToPrevSection || this.#canGoToNextSection) return
+    //             this.#canGoToNextSection = true
+    //             this.dispatchEvent(new CustomEvent('next', {detail: {show: true}}))
+    //             return
+    //         }
+    //         if (start < -50) {
+    //             if (this.atStart || this.#canGoToNextSection || this.#canGoToPrevSection) return
+    //             this.#canGoToPrevSection = true
+    //             this.dispatchEvent(new CustomEvent('previous', {detail: {show: true}}))
+    //             return
+    //         }
 
-            this.#canGoToPrevSection = false
-            this.#canGoToNextSection = false
+    //         this.#canGoToPrevSection = false
+    //         this.#canGoToNextSection = false
 
-            if (this.sentEvent && (this.#canGoToPrevSection || this.#canGoToPrevSection)) {
-                this.sentEvent = false
-                this.dispatchEvent(new CustomEvent('next', { detail: { show: false } }))
-                this.dispatchEvent(new CustomEvent('previous', { detail: { show: false } }))
-            } else {
-                this.sentEvent = true
-            }
-        }
-    }
+    //         if (this.sentEvent && (this.#canGoToPrevSection || this.#canGoToPrevSection)) {
+    //             this.sentEvent = false
+    //             this.dispatchEvent(new CustomEvent('next', { detail: { show: false } }))
+    //             this.dispatchEvent(new CustomEvent('previous', { detail: { show: false } }))
+    //         } else {
+    //             this.sentEvent = true
+    //         }
+    //     }
+    // }
     // allows one to process rects as if they were LTR and horizontal
     #getRectMapper() {
         if (this.scrolled) {
@@ -899,25 +899,25 @@ export class Paginator extends HTMLElement {
         }
         // if anchor is a fraction
         if (this.scrolled) {
-            if (this.#goingPrev || this.#goingNext) {
-                if (this.#goingPrev) {
-                    await this.#scrollTo(this.viewSize, 'anchor')
-                    this.#goingPrev = false
-                    return
-                } else {
-                    await this.#scrollTo(0, 'anchor')
-                    this.#goingNext = false
-                    return
-                }
-            }
-            // idk what this.#anchor is ????
-            this.#anchor &&
-              debugMessage(
-                  `[SCROLLTOANCHOR] anchor ${JSON.stringify(this.#anchor)} ${
-                      this.#anchor
-                  }`,
-              )
-            // await this.#scrollTo(this.#anchor * this.viewSize, 'anchor')
+            // if (this.#goingPrev || this.#goingNext) {
+            //     if (this.#goingPrev) {
+            //         await this.#scrollTo(this.viewSize, 'anchor')
+            //         this.#goingPrev = false
+            //         return
+            //     } else {
+            //         await this.#scrollTo(0, 'anchor')
+            //         this.#goingNext = false
+            //         return
+            //     }
+            // }
+            // // idk what this.#anchor is ????
+            // this.#anchor &&
+            //   debugMessage(
+            //       `[SCROLLTOANCHOR] anchor ${JSON.stringify(this.#anchor)} ${
+            //           this.#anchor
+            //       }`,
+            //   )
+            await this.#scrollTo(this.#anchor * this.viewSize, 'anchor')
             return
         }
         const { pages } = this
